@@ -41,6 +41,7 @@
 
         a { text-decoration: none; color: inherit; }
 
+        /* --- INSTANT PAGE SWITCHING --- */
         .page {
             display: none;
             padding-bottom: 100px;
@@ -60,25 +61,92 @@
 
         /* --- Loader Styles --- */
         #progress-bar-loader {
-            position: fixed; left: 0; width: 100%; height: 3px;
+            position: fixed; left: 0; width: 100%; height: 4px;
             background-color: transparent; z-index: 9998;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+            transition: opacity 0.1s ease;
             overflow: hidden;
         }
         #progress-bar-loader.visible {
             opacity: 1; visibility: visible;
-            transition: opacity 0.1s ease, visibility 0s;
         }
         #progress-bar-loader::before {
             content: ''; display: block; height: 100%; width: 100%;
             background-image: linear-gradient(to right, #FFA41C, #FFD814, #FFA41C);
             background-size: 200% auto;
-            animation: progressBarFlow 1.2s linear infinite;
+            animation: progressBarFlow 1s linear infinite;
         }
         @keyframes progressBarFlow {
             0% { background-position: 0% 0; }
             100% { background-position: -100% 0; }
+        }
+
+        /* --- INVOICE LOADER (Small Square Box) --- */
+        #invoice-loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 11000; /* Highest priority */
+            display: none;
+            justify-content: center; align-items: center;
+            /* Transparent background so user sees page behind */
+            background-color: transparent; 
+            pointer-events: all; /* Block clicks */
+        }
+        
+        .invoice-box {
+            width: 100px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.75); /* Dark Transparent Box */
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .invoice-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3); 
+            border-top: 3px solid #ffffff; 
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* --- SKELETON LOADING STYLES --- */
+        .skeleton {
+            background: #e1e4e8;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::after {
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 1.5s infinite;
+            content: '';
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        /* Skeleton Card Shape */
+        .skeleton-card {
+            flex: 0 0 140px; width: 140px; height: 140px;
+            border-radius: 8px; margin-right: 10px;
+            background-color: #fff; /* White bg */
+            border: 1px solid #eee;
+        }
+        /* Inner gray box to simulate image */
+        .skeleton-inner {
+            width: 80%; height: 80%;
+            background-color: #f0f2f2;
+            margin: 10% auto;
+            border-radius: 4px;
         }
 
         /* Header and Footer */
@@ -93,11 +161,10 @@
         }
         .full-width-image.no-gap { margin-top: -1px; }
         
-        /* IMAGE GLITCH FIX: Force GPU Rendering */
-        .full-width-image, .track-product-image, img {
+        /* Force GPU to keep image in memory */
+        img {
             -webkit-transform: translate3d(0,0,0);
             transform: translate3d(0,0,0);
-            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
         }
 
@@ -825,6 +892,13 @@
 
 <div id="progress-bar-loader"></div>
 
+<!-- Invoice Loader Overlay -->
+<div id="invoice-loader-overlay">
+    <div class="invoice-box">
+        <div class="invoice-spinner"></div>
+    </div>
+</div>
+
 <!-- Custom In-App Alert Box -->
 <div id="custom-msg-overlay" class="custom-overlay">
     <div class="custom-box">
@@ -1250,6 +1324,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delete handling vars
     let itemToDeleteId = null;
     let itemToDeleteType = null;
+    
+    // 1st Time Load Flag (Session)
+    let isFirstLoad = !sessionStorage.getItem('appLoaded');
 
     const DB = {
         get: (key) => JSON.parse(localStorage.getItem(key)) || [],
@@ -1271,9 +1348,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Images for logic
     const IMG_ORDERED = "https://ik.imagekit.io/5lz94dan6e/Screenshot_20251203_200923_Amazon.jpg?updatedAt=1764772917354";
-    
-    // Flag for Skeleton Loading
-    let isFirstLoad = !sessionStorage.getItem('appLoaded');
 
     function initializeDefaultData() {
         if (!localStorage.getItem('initialized')) {
@@ -1289,10 +1363,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pages = document.querySelectorAll('.page');
     
+    // --- PRELOAD LOGIC: Show but hide visibility to load assets ---
+    function preloadSubPages() {
+        const orderItems = DB.get('purchaseHistoryItems');
+        if(!orderItems || orderItems.length === 0) return;
+
+        // Force browser to fetch image by creating hidden img
+        const latestItem = orderItems[0]; 
+        const hiddenContainer = document.createElement('div');
+        hiddenContainer.style.position = 'absolute';
+        hiddenContainer.style.top = '-9999px';
+        hiddenContainer.style.width = '100px';
+        hiddenContainer.style.height = '100px';
+        hiddenContainer.style.overflow = 'hidden';
+        document.body.appendChild(hiddenContainer);
+        
+        const img = new Image();
+        img.src = latestItem.progressStepImageUrl;
+        hiddenContainer.appendChild(img);
+        
+        setTimeout(() => { document.body.removeChild(hiddenContainer); }, 2000);
+    }
+    
+    // --- INVOICE LOADER FUNCTION ---
+    window.triggerInvoiceLoader = function(id) {
+        // Show Small Square Overlay
+        const overlay = document.getElementById('invoice-loader-overlay');
+        overlay.style.display = 'flex';
+        
+        // Wait 4 Seconds
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            // Then Switch Page
+            window.location.hash = `#invoice-${id}`;
+        }, 4000);
+    }
+
+    // --- UPDATED INSTANT SHOW PAGE LOGIC (Random 1-3s Wait + Preload Trick) ---
     function showPage(pageId, params = null) {
         // Auto-login logic check
         const storedUser = localStorage.getItem('adminUser');
-        
         if (storedUser && !currentUser.id) {
             currentUser = JSON.parse(storedUser);
             document.getElementById('login-overlay').style.display = 'none';
@@ -1304,55 +1414,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const loader = document.getElementById('progress-bar-loader');
-        const currentlyActivePage = document.querySelector('.page.active .content');
         const headerImg = document.getElementById('header-img');
-        const header = document.querySelector('.fixed-header');
 
-        header.style.display = 'block';
-
+        // Header Image Logic
         if (pageId === 'home-page') {
              headerImg.src = HEADER_URLS.home;
         } else {
              headerImg.src = HEADER_URLS.other;
         }
 
-        if (currentlyActivePage) {
-            currentlyActivePage.classList.add('content-loading');
-        }
+        // Show Loader
         loader.classList.add('visible');
 
+        // If going to Orders Page, trigger preload for Track Page images
+        if (pageId === 'orders-page') {
+            setTimeout(preloadSubPages, 200);
+        }
+        
+        // Random Transition Time (1-3 Seconds)
+        const transitionTime = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
+
+        // Wait random time before switching page (Simulates load time & hides glitch)
         setTimeout(() => {
-            pages.forEach(page => page.classList.remove('active'));
             const targetPage = document.getElementById(pageId);
+                
             if (targetPage) {
-                if (pageId === 'home-page') {
-                    renderHomePageContent();
-                } else if (pageId === 'orders-page') {
-                    renderAllOrdersPageContent();
-                } else if (pageId === 'details-page' && params) {
-                    renderOrderDetails(params.id);
-                } else if (pageId === 'image-page' && params) {
-                    renderImagePage(params);
-                } else if (pageId === 'track-page' && params) {
+                if (pageId === 'home-page') renderHomePageContent();
+                else if (pageId === 'orders-page') renderAllOrdersPageContent();
+                else if (pageId === 'details-page' && params) renderOrderDetails(params.id);
+                else if (pageId === 'image-page' && params) renderImagePage(params);
+                else if (pageId === 'track-page' && params) {
                     renderTrackPage(params.id);
                     adjustStickyHeaderTop();
-                } else if (pageId === 'order-summary-page' && params) {
-                    renderOrderSummaryPage(params.id);
-                } else if (pageId === 'invoice-page' && params) {
-                    renderInvoicePage(params.id);
-                } else if (pageId === 'admin-page') {
-                    renderAdminPanel();
-                }
+                } else if (pageId === 'order-summary-page' && params) renderOrderSummaryPage(params.id);
+                else if (pageId === 'invoice-page' && params) renderInvoicePage(params.id);
+                else if (pageId === 'admin-page') renderAdminPanel();
                 
+                // Switch classes
+                pages.forEach(page => {
+                    if (page.id !== pageId) page.classList.remove('active');
+                });
                 targetPage.classList.add('active');
-                const newContent = targetPage.querySelector('.content');
-                if (newContent) {
-                    newContent.classList.remove('content-loading');
-                }
                 window.scrollTo(0, 0);
             }
+            
+            // Hide Loader after switch is done
             loader.classList.remove('visible');
-        }, 100); 
+        }, transitionTime);
     }
 
     function handleRouteChange() {
@@ -1442,16 +1550,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById(`${sectionKey}-cards`);
         if (!container) return;
         
+        // --- 1st Visit Skeleton Logic ---
         if (sectionKey === 'yourOrders' && isFirstLoad) {
+            // Show Skeleton only for Your Orders first
             container.innerHTML = `
-                <div class="skeleton skeleton-card"></div>
-                <div class="skeleton skeleton-card"></div>
-                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card">
+                   <div class="skeleton-inner"></div>
+                </div>
+                <div class="skeleton skeleton-card">
+                   <div class="skeleton-inner"></div>
+                </div>
+                <div class="skeleton skeleton-card">
+                   <div class="skeleton-inner"></div>
+                </div>
             `;
+            // Fake loading time
             setTimeout(() => {
                 isFirstLoad = false;
                 sessionStorage.setItem('appLoaded', 'true');
-                renderHomePageCardSection(sectionKey); 
+                renderHomePageContent(); // Re-render real data
             }, 1500);
             return;
         }
@@ -1677,7 +1794,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>Order info</h3>
                 <a href="#order-summary-${item.id}" class="list-button"><span>View order details</span><span class="arrow">&gt;</span></a>
                 <a href="#" class="list-button"><span>Share gift receipt</span><span class="arrow">&gt;</span></a>
-                <a href="#invoice-${item.id}" class="list-button"><span>Download Invoice</span><span class="arrow">&gt;</span></a>
+                <!-- INVOICE LINK WITH NEW TRIGGER -->
+                <a href="#" onclick="triggerInvoiceLoader(${item.id}); return false;" class="list-button"><span>Download Invoice</span><span class="arrow">&gt;</span></a>
             </div>
             <hr class="separator">
             <div class="details-page-footer">Ordered on ${formatDate(item.orderDate)}</div>
@@ -1891,7 +2009,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span class="os-val-black">${item.orderNumber || ''}</span>
                 </div>
               </div>
-              <div class="os-invoice-row" onclick="location.hash='#invoice-${item.id}'">
+              <div class="os-invoice-row" onclick="triggerInvoiceLoader(${item.id});">
                 <span>Download Invoice</span>
                 <span class="os-chevron"></span>
               </div>
