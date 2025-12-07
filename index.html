@@ -11,13 +11,26 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
 
+    <!-- AAPKA POORA PURANA CSS WAPAS DAAL DIYA GAYA HAI -->
     <style>
         /* General Setup */
         :root { --loader-time: 2s; }
         body, html {
             margin: 0; padding: 0; width: 100%;
             background-color: white; font-family: sans-serif;
+            /* Below rule prevents the callout menu on long press in iOS Safari */
+            -webkit-touch-callout: none; 
         }
+
+        /* This universal selector disables text selection and the blue tap highlight */
+        * {
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE10+ */
+            user-select: none;         /* Standard */
+            -webkit-tap-highlight-color: transparent; /* Removes blue bar on tap */
+        }
+        
         img { width: 100%; display: block; height: auto; vertical-align: middle; }
         .hidden { display: none !important; }
 
@@ -139,17 +152,12 @@
         #admin-bundle-editor { border-top: 2px solid #ffd700; margin-top: 20px; padding-top: 20px; }
     </style>
 </head>
-<body>
+<body ondragstart="return false;" ondrop="return false;">
 
-    <!-- Background Image -->
+    <!-- AAPKA POORA PURANA HTML WAPAS DAAL DIYA GAYA HAI -->
     <div id="background-image"></div>
-
-    <!-- Splash Screen -->
     <div id="splash-screen"></div>
 
-    <!-- ======================= -->
-    <!--      MAIN PAGE          -->
-    <!-- ======================= -->
     <div id="main-page" class="page-wrapper">
         <header class="sticky-header">
             <div id="header-clickable-area" class="header-image-container">
@@ -165,7 +173,7 @@
         </div>
         <footer class="sliding-footer">
             <div class="footer-grid-container">
-                <img src="https://ik.imagekit.io/5lz94dan6e/Screenshot_20251128_084429_Amazon.jpg?updatedAt=1764394002880" alt="Footer">
+                <img src="https://ik.imagekit.io/5lz94dan6e/Screenshot_20251128_084429_Amazon.jpg" alt="Footer">
                 <div class="footer-grid">
                     <a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a>
                     <div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div>
@@ -175,9 +183,6 @@
         </footer>
     </div>
 
-    <!-- ======================= -->
-    <!--      CART PAGE          -->
-    <!-- ======================= -->
     <div id="cart-page" class="page-wrapper hidden">
         <header class="sticky-header">
             <div class="header-image-container">
@@ -190,12 +195,12 @@
         <div id="cart-page-content-wrapper">
             <div class="loader"></div>
             <main id="cart-page-content">
-                <img src="https://ik.imagekit.io/goldencodes/Picsart_25-11-06_23-59-32-684.jpg?updatedAt=1762453796056" alt="Cart Image">
+                <img src="https://ik.imagekit.io/owsrw93we/Picsart_25-12-07_17-22-05-974.jpg" alt="Cart Image">
             </main>
         </div>
         <footer class="sliding-footer">
             <div class="footer-grid-container">
-                <img src="https://ik.imagekit.io/5lz94dan6e/Screenshot_20251128_084429_Amazon.jpg?updatedAt=1764394002880" alt="Cart Footer">
+                <img src="https://ik.imagekit.io/5lz94dan6e/Screenshot_20251128_084429_Amazon.jpg" alt="Cart Footer">
                 <div class="footer-grid">
                     <a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a>
                     <div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div>
@@ -205,12 +210,10 @@
         </footer>
     </div>
 
-    <!-- Pop-ups -->
-    <div id="popup-1" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/goldencodes/Picsart_25-11-07_01-50-46-828.png?updatedAt=1762460531235" alt="Special Popup"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
-    <div id="popup-2" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/goldencodes/Picsart_25-11-07_02-08-55-599.jpg?updatedAt=1762461555587" alt="Special Popup 2"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
-    <div id="popup-3" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/goldencodes/Picsart_25-11-07_01-50-16-726.png?updatedAt=1762460530551" alt="Special Popup 3"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
+    <div id="popup-1" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/owsrw93we/Picsart_25-12-07_17-27-13-946.png" alt="Special Popup"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
+    <div id="popup-2" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/owsrw93we/Screenshot_20251207_172839_Amazon.jpg" alt="Special Popup 2"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
+    <div id="popup-3" class="popup-container hidden"><div class="popup-content footer-grid-container"><img src="https://ik.imagekit.io/owsrw93we/Screenshot_20251207_173028_Amazon.jpg" alt="Special Popup 3"><div class="footer-grid"><a href="#" class="footer-link home-trigger"></a><a href="order.html" class="footer-link"></a><div class="footer-link popup-trigger-1"></div><div class="footer-link cart-trigger"></div><div class="footer-link popup-trigger-2"></div><div class="footer-link popup-trigger-3"></div></div></div></div>
     
-    <!-- Admin Panel -->
     <div id="admin-panel" class="admin-panel hidden">
         <div id="admin-bundle-list-view">
             <h2>Content Bundles</h2><ul id="admin-bundle-list"></ul>
@@ -227,30 +230,44 @@
     </div>
 
     <script>
+        // SABHI SCRIPTS KO EK HI JAGAH RAKH DIYA GAYA HAI
         document.addEventListener("DOMContentLoaded", function() {
-            // --- Splash Screen Logic ---
+            
+            // --- NAYA LOGIC COPYING AUR RIGHT-CLICK ROKNE KE LIYE ---
+            // Right-click context menu ko disable karna
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            // Keyboard shortcuts (Ctrl+C, Ctrl+U, etc.) ko disable karna
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+C (Copy), Ctrl+X (Cut), Ctrl+U (View Source), Ctrl+S (Save)
+                if (e.ctrlKey && ['c', 'x', 'u', 's'].includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                }
+                // F12 (Developer Tools)
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                }
+            });
+
+            // --- AAPKA POORA PURANA FEATURE WALA JAVASCRIPT ---
             const splashScreen = document.getElementById('splash-screen');
-            // Check if the splash screen has already been shown in this session
             if (sessionStorage.getItem('splashShown')) {
-                // If it has (i.e., page was refreshed), hide it immediately
                 splashScreen.style.display = 'none';
             } else {
-                // If it hasn't (i.e., app is starting), show it, set the flag, and then hide it after a delay
                 sessionStorage.setItem('splashShown', 'true');
                 setTimeout(() => {
                     splashScreen.classList.add('splash-hidden');
-                }, 2500); // Hide after 2.5 seconds
+                }, 2500);
             }
 
-            // Page containers & elements
             const mainPage = document.getElementById('main-page');
             const cartPage = document.getElementById('cart-page');
             const popups = [document.getElementById('popup-1'), document.getElementById('popup-2'), document.getElementById('popup-3')];
-            
             const mainSubHeader = document.querySelector('#main-page .sub-header');
             const mainFooter = document.querySelector('#main-page .sliding-footer');
             const cartFooter = document.querySelector('#cart-page .sliding-footer');
-            
             const adminPanel = document.getElementById('admin-panel');
             const headerClickableArea = document.getElementById('header-clickable-area');
             const bundleListView = document.getElementById('admin-bundle-list-view');
@@ -270,29 +287,21 @@
             let bundles = [];
             let currentEditingBundleIndex = -1;
 
-            // --- Core Functions ---
             function handleScroll() {
                 let st = window.pageYOffset || document.documentElement.scrollTop;
                 const onCartPage = !cartPage.classList.contains('hidden');
-                
                 if (!onCartPage) {
                     if (st > 50) mainSubHeader.classList.add('sub-header-hidden');
                     else mainSubHeader.classList.remove('sub-header-hidden');
                 }
-
                 const activeFooter = onCartPage ? cartFooter : mainFooter;
                 if (st > lastScrollTop && st > 50) activeFooter.classList.add('footer-hidden');
                 else activeFooter.classList.remove('footer-hidden');
-                
                 lastScrollTop = st <= 0 ? 0 : st;
             }
 
             function closeAllPopups() {
-                popups.forEach(p => {
-                    p.classList.add('hidden');
-                    p.style.top = ''; // Reset inline style
-                    p.style.height = ''; // Reset inline style
-                });
+                popups.forEach(p => { p.classList.add('hidden'); p.style.top = ''; p.style.height = ''; });
                 mainPage.classList.remove('blur');
                 cartPage.classList.remove('blur');
             }
@@ -307,36 +316,27 @@
                 handleScroll();
             }
             function showPopup(popupElement) {
-                closeAllPopups(); // First, close any open popups and reset styles
-
+                closeAllPopups();
                 const activePage = cartPage.classList.contains('hidden') ? mainPage : cartPage;
                 const activeHeader = activePage.querySelector('.sticky-header');
-
-                // Dynamically set the popup's position to be below the header
                 if (activeHeader) {
                     const headerHeight = activeHeader.offsetHeight;
                     popupElement.style.top = `${headerHeight}px`;
                     popupElement.style.height = `calc(100% - ${headerHeight}px)`;
                 }
-
                 popupElement.classList.remove('hidden');
                 activePage.classList.add('blur');
             }
 
-            // --- Admin Panel & Dynamic Content ---
             const defaultContent = [ "https://ik.imagekit.io/goldencodes/Picsart_25-11-06_21-07-27-558.jpg?updatedAt=1762443478788", "https://ik.imagekit.io/goldencodes/Picsart_25-11-06_21-54-28-996.jpg?updatedAt=1762446300267" ];
 
             function runLoadingAnimation(contentSelector, changeContentCallback) {
                 const contentArea = document.querySelector(contentSelector);
                 const loader = contentArea.parentElement.querySelector('.loader');
-                
                 contentArea.classList.add('loading');
                 loader.classList.add('active');
-
                 setTimeout(() => {
-                    if (changeContentCallback) {
-                        changeContentCallback();
-                    }
+                    if (changeContentCallback) { changeContentCallback(); }
                     loader.classList.remove('active');
                     setTimeout(() => contentArea.classList.remove('loading'), 100);
                 }, 2000);
@@ -344,12 +344,7 @@
             
             function loadBundlesFromStorage() { bundles = JSON.parse(localStorage.getItem('contentBundles') || '[]'); }
             function saveBundlesToStorage() { localStorage.setItem('contentBundles', JSON.stringify(bundles)); }
-
-            function showBundleListView() {
-                bundleListView.classList.remove('hidden');
-                bundleEditorView.classList.add('hidden'); renderBundleList();
-            }
-
+            function showBundleListView() { bundleListView.classList.remove('hidden'); bundleEditorView.classList.add('hidden'); renderBundleList(); }
             function showBundleEditor(index) {
                 currentEditingBundleIndex = index;
                 bundleListView.classList.add('hidden');
@@ -357,7 +352,6 @@
                 editorTitle.textContent = `Editing: ${bundles[index].name}`;
                 renderUrlList();
             }
-
             function renderBundleList() {
                 bundleList.innerHTML = '';
                 bundles.forEach((bundle, index) => {
@@ -366,7 +360,6 @@
                     bundleList.appendChild(li);
                 });
             }
-            
             function renderUrlList() {
                 urlList.innerHTML = '';
                 const urls = bundles[currentEditingBundleIndex].urls;
@@ -391,7 +384,6 @@
                 const name = prompt("Enter a name for the new bundle:");
                 if (name) { bundles.push({ name: name, urls: [] }); showBundleEditor(bundles.length - 1); }
             });
-
             bundleList.addEventListener('click', (e) => {
                 const index = e.target.dataset.index;
                 if (e.target.classList.contains('edit-bundle-btn')) showBundleEditor(index);
@@ -401,7 +393,6 @@
                     }
                 }
             });
-
             addUrlBtn.addEventListener('click', () => {
                 const url = urlInput.value.trim();
                 if (url) { bundles[currentEditingBundleIndex].urls.push(url); urlInput.value = ''; renderUrlList(); }
@@ -413,20 +404,14 @@
             });
             saveBundleBtn.addEventListener('click', () => { saveBundlesToStorage(); showBundleListView(); });
 
-            // --- Initial Page Load ---
             loadBundlesFromStorage();
-            let contentToRender;
-            if (bundles.length > 0) {
-                const randomBundle = bundles[Math.floor(Math.random() * bundles.length)];
-                contentToRender = randomBundle.urls;
-            } else { contentToRender = defaultContent; }
+            let contentToRender = (bundles.length > 0) ? bundles[Math.floor(Math.random() * bundles.length)].urls : defaultContent;
             
             runLoadingAnimation('#main-page-content', () => {
                 const contentArea = document.getElementById('main-page-content');
                 contentArea.innerHTML = contentToRender.map(url => `<img src="${url}" alt="Main Content">`).join('');
             });
 
-            // --- Universal Triggers ---
             document.querySelectorAll('.home-trigger').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); if (mainPage.classList.contains('hidden')) { showHomePage(); } else { window.location.reload(); } }));
             document.querySelectorAll('.cart-trigger').forEach(el => el.addEventListener('click', showCartPage));
             document.querySelectorAll('.popup-trigger-1').forEach(el => el.addEventListener('click', () => showPopup(popups[0])));
@@ -435,18 +420,21 @@
             
             window.addEventListener('scroll', handleScroll, false);
             popups.forEach(p => p.addEventListener('click', (e) => { if (e.target === p) closeAllPopups(); }));
-        });
-    </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
+
+
+
+            window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
+                console.log('PWA was installed');
             });
-        }
+
+            if ('serviceWorker' in navigator) {
+                // Pehle se 'load' event ke andar hai, dobara add karne ki zaroorat nahi
+                navigator.serviceWorker.register('/pannel/sw.js')
+                    .then(registration => console.log('ServiceWorker registered successfully with scope: ', registration.scope))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            }
+        });
     </script>
 </body>
 </html>
