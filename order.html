@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +17,7 @@
             --dark-grey: #343a40;
             --light-blue: #e6f3ff;
             --amazon-green: #3E8277;
+            --amazon-teal: #007185; /* NEW TEAL COLOR */
         }
         
         * {
@@ -58,6 +60,23 @@
         #home-page .content {
              padding-bottom: 100px;
         }
+        
+        /* --- IMAGE PAGE STYLES (FULL WIDTH) --- */
+        #image-page .content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 90vh; /* Adjust for header/footer */
+            background-color: #fff;
+            padding: 0;
+        }
+        
+        #image-page img {
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+        }
 
         /* --- Loader Styles --- */
         #progress-bar-loader {
@@ -87,15 +106,14 @@
             z-index: 11000; /* Highest priority */
             display: none;
             justify-content: center; align-items: center;
-            /* Transparent background so user sees page behind */
             background-color: transparent; 
-            pointer-events: all; /* Block clicks */
+            pointer-events: all; 
         }
         
         .invoice-box {
             width: 100px;
             height: 100px;
-            background-color: rgba(0, 0, 0, 0.75); /* Dark Transparent Box */
+            background-color: rgba(0, 0, 0, 0.75); 
             border-radius: 12px;
             display: flex;
             justify-content: center;
@@ -134,14 +152,12 @@
         @keyframes shimmer {
             100% { transform: translateX(100%); }
         }
-        /* Skeleton Card Shape */
         .skeleton-card {
             flex: 0 0 140px; width: 140px; height: 140px;
             border-radius: 8px; margin-right: 10px;
-            background-color: #fff; /* White bg */
+            background-color: #fff;
             border: 1px solid #eee;
         }
-        /* Inner gray box to simulate image */
         .skeleton-inner {
             width: 80%; height: 80%;
             background-color: #f0f2f2;
@@ -180,8 +196,10 @@
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
         }
         #home-page .module-title { font-weight: bold; font-size: 18px; }
+        
+        /* UPDATED COLOR: TEAL */
         .see-all, .edit-button {
-            text-decoration: none; color: var(--primary-blue); font-size: 14px;
+            text-decoration: none; color: var(--amazon-teal); font-size: 14px;
             background: none; border: none; cursor: pointer; padding: 0;
         }
         .edit-button { margin-right: 5px; }
@@ -261,7 +279,7 @@
             font-size: 1.2rem; font-weight: bold; margin: 0;
         }
         #orders-page .module-header .see-more {
-            font-size: 0.9rem; color: #007185; text-decoration: none; cursor: pointer;
+            font-size: 0.9rem; color: var(--amazon-teal); text-decoration: none; cursor: pointer;
         }
 
         .buy-again-grid {
@@ -325,12 +343,12 @@
         .product-info-module .product-details {
             display: flex; flex-direction: column; justify-content: center; height: 150px;
         }
-        .product-info-module .product-details .product-name {
-            color: #007185; font-size: 0.9rem; display: block; margin-bottom: 8px; text-decoration: none;
+        .product-info-module .product-name {
+            color: var(--amazon-teal); font-size: 0.9rem; display: block; margin-bottom: 8px; text-decoration: none;
         }
         .product-info-module .product-details .product-name:hover { text-decoration: underline; }
         .product-info-module .product-details .share-item {
-            color: #007185; font-size: 0.9rem; cursor: pointer;
+            color: var(--amazon-teal); font-size: 0.9rem; cursor: pointer;
         }
 
         .delivery-status-module { padding: 16px; border-top: 1px solid #ddd; }
@@ -338,7 +356,7 @@
             display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
         }
         .delivery-status .icon {
-            background-color: #007185; color: white; width: 24px; height: 24px;
+            background-color: var(--amazon-teal); color: white; width: 24px; height: 24px;
             display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: bold;
         }
         .delivery-status .text-bold { font-weight: bold; }
@@ -376,7 +394,7 @@
         }
         .track-module-header h2 { font-size: 1rem; font-weight: bold; margin: 0; flex-grow: 1; }
         .track-module-header .see-all-orders {
-            font-size: 0.9rem; color: #007185; text-decoration: none; white-space: nowrap;
+            font-size: 0.9rem; color: var(--amazon-teal); text-decoration: none; white-space: nowrap;
         }
         .thin-separator { border: none; border-top: 1px solid #ddd; margin: 0 -16px; }
         
@@ -442,7 +460,7 @@
 
         .shipped-with-info { padding: 0 16px 16px 16px; }
         .shipped-with-info h3 { font-size: 1.2rem; font-weight: bold; margin: 0 0 8px 0; }
-        .shipped-with-info p, .shipped-with-info a { font-size: 1rem; margin: 0 0 4px 0; color: #007185; text-decoration: none; }
+        .shipped-with-info p, .shipped-with-info a { font-size: 1rem; margin: 0 0 4px 0; color: var(--amazon-teal); text-decoration: none; }
         
         /* Updates Overlay Styles */
         .updates-overlay-container {
@@ -559,7 +577,7 @@
         .os-prod-info { font-size: 14px; line-height: 1.35; }
         .os-prod-name { font-weight: 700; margin-bottom: 4px; display: block; text-decoration: none; color: inherit; }
         .os-sold-line { font-size: 12px; color: #565959; margin-bottom: 4px;}
-        .os-blue-link { color: #007185; text-decoration: none; }
+        .os-blue-link { color: var(--amazon-teal); text-decoration: none; }
         .os-price-text { font-weight: 700; font-size: 14px; }
 
         .os-button-container {
@@ -882,7 +900,7 @@
         .invoice-img-container img { width: 80px; height: 80px; object-fit: contain; }
         .invoice-badge { display: none !important; }
         .invoice-product-details { display: flex; flex-direction: column; }
-        .invoice-product-link { color: #007185; text-decoration: none; font-size: 13px; font-weight: bold; margin-bottom: 2px; }
+        .invoice-product-link { color: var(--amazon-teal); text-decoration: none; font-size: 13px; font-weight: bold; margin-bottom: 2px; }
         .invoice-product-link:hover { text-decoration: underline; }
         .invoice-seller-text { color: #565959; font-size: 11px; margin-bottom: 2px; }
         .invoice-price-text { color: #B12704; font-weight: bold; font-size: 13px; }
@@ -1399,7 +1417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // --- UPDATED INSTANT SHOW PAGE LOGIC (Random 1-3s Wait + Preload Trick) ---
+    // --- UPDATED INSTANT SHOW PAGE LOGIC (Fixed 1s Wait + Preload Trick) ---
     function showPage(pageId, params = null) {
         // Auto-login logic check
         const storedUser = localStorage.getItem('adminUser');
@@ -1431,10 +1449,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(preloadSubPages, 200);
         }
         
-        // Random Transition Time (1-3 Seconds)
-        const transitionTime = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
+        // FIXED 1 Second Transition
+        const transitionTime = 1000;
 
-        // Wait random time before switching page (Simulates load time & hides glitch)
+        // Wait before switching page (Simulates load time & hides glitch)
         setTimeout(() => {
             const targetPage = document.getElementById(pageId);
                 
@@ -1554,15 +1572,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sectionKey === 'yourOrders' && isFirstLoad) {
             // Show Skeleton only for Your Orders first
             container.innerHTML = `
-                <div class="skeleton skeleton-card">
-                   <div class="skeleton-inner"></div>
-                </div>
-                <div class="skeleton skeleton-card">
-                   <div class="skeleton-inner"></div>
-                </div>
-                <div class="skeleton skeleton-card">
-                   <div class="skeleton-inner"></div>
-                </div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
             `;
             // Fake loading time
             setTimeout(() => {
@@ -1582,6 +1594,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const orders = DB.get('purchaseHistoryItems');
             if (orders && orders.length > 0) {
                 orders.forEach(item => {
+                    // Standard Nav = Details, Else = Track (usually)
+                    // The prompt asked for specific image links on Details/Track pages.
+                    // Home page usually navigates to details/track.
                     const linkHref = `#track-${item.id}`; 
                     container.appendChild(createCard(item.imageUrl, linkHref));
                 });
@@ -1881,7 +1896,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="#orders" class="see-all-orders">see all orders</a>
                 </div>
                 <div class="track-product-image-container">
-                    <img src="${item.imageUrl}" alt="${item.name}" class="track-product-image">
+                    <a href="#image-${item.id}-purchaseHistory"><img src="${item.imageUrl}" alt="${item.name}" class="track-product-image"></a>
                 </div>
                 <hr class="thin-separator">
             </div>
@@ -2857,6 +2872,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const productName = e.target.dataset.productName;
             const defaultShareUrl = 'https://www.amazon.in/';
             const customShareUrl = e.target.dataset.shareLink;
+            // CHECK IF SHARE LINK IS EMPTY
+            if (!customShareUrl) return; 
+
             const shareUrl = customShareUrl || defaultShareUrl;
             const shareText = `Check out this product: ${productName}`;
             if (navigator.share) {
