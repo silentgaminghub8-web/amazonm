@@ -92,6 +92,15 @@
             width: 100%; height: auto; display: block;
         }
         .full-width-image.no-gap { margin-top: -1px; }
+        
+        /* IMAGE GLITCH FIX: Force GPU Rendering */
+        .full-width-image, .track-product-image, img {
+            -webkit-transform: translate3d(0,0,0);
+            transform: translate3d(0,0,0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
         #back-tap-area {
             position: absolute; top: 0; left: 0; width: 25%; height: 100%; z-index: 1001;
         }
@@ -541,6 +550,15 @@
         }
         .admin-header-main h1 { margin: 0; font-size: 1.5rem; }
         .admin-header-main a { color: var(--primary-blue); text-decoration: none; }
+        .admin-header-actions { display: flex; align-items: center; gap: 15px; }
+        
+        /* Notification Icon */
+        .notification-icon-container { position: relative; cursor: pointer; }
+        .notification-icon { font-size: 1.5rem; color: #333; }
+        .notification-dot {
+            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+            background-color: var(--danger-red); border-radius: 50%; display: none;
+        }
         
         .admin-section-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -612,7 +630,7 @@
         /* Custom Alert & Confirm Modal Styles */
         .custom-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 9999; display: none;
+            background: rgba(0,0,0,0.5); z-index: 10000 !important; display: none;
             justify-content: center; align-items: center;
         }
         .custom-box {
@@ -621,11 +639,19 @@
             text-align: center; font-family: "Amazon Ember", Arial, sans-serif;
         }
         .custom-box p { margin: 0 0 20px 0; font-size: 16px; color: #333; }
+        .custom-box h3 { margin-top: 0; }
+        .custom-box input { margin-bottom: 15px; width: 100%; }
+        
         .custom-box button {
             padding: 10px 20px; border: none; border-radius: 5px;
             font-weight: bold; cursor: pointer; font-size: 14px;
         }
         #custom-msg-close { background: var(--primary-blue); color: white; width: 100%; }
+        
+        /* Specific Z-Index for API Modal to be below Alert but above Admin */
+        #api-run-modal { z-index: 5000; }
+        
+        #wallet-key-modal { z-index: 10001; }
 
         /* Admin Modal Styles */
         .admin-modal-overlay {
@@ -677,14 +703,10 @@
             height: 30px;
             text-align: center;
             line-height: 30px;
+            cursor: pointer;
         }
         #wallet-btn {
             font-size: 1.5rem; 
-            pointer-events: none; 
-        }
-        #wallet-verification-date {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; cursor: pointer; z-index: 10;
         }
         
         /* Login Overlay */
@@ -818,6 +840,43 @@
         <div style="display:flex; gap:10px; justify-content:center;">
             <button id="confirm-yes" class="admin-button" style="background:var(--danger-red);">Yes</button>
             <button id="confirm-no" class="admin-button secondary">No</button>
+        </div>
+    </div>
+</div>
+
+<!-- API Run Modal -->
+<div id="api-run-modal" class="custom-overlay">
+    <div class="custom-box">
+        <h3>Verify Order</h3>
+        <input type="text" id="api-order-input" placeholder="Enter existing Order #">
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="api-pay-btn" class="admin-button secondary">Pay 500Rs</button>
+            <button id="api-close-btn" class="admin-button" style="background:#6c757d;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Modal -->
+<div id="notification-modal" class="custom-overlay">
+    <div class="custom-box">
+        <h3>Notification</h3>
+        <p id="notification-text" style="white-space: pre-wrap; text-align:left;"></p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="notif-read-btn" class="admin-button secondary">Read</button>
+            <button id="notif-reply-btn" class="admin-button">Send Message</button>
+            <button id="notif-close-btn" class="admin-button" style="background:#6c757d;">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Wallet Key Modal (Replaces Prompt) -->
+<div id="wallet-key-modal" class="custom-overlay">
+    <div class="custom-box">
+        <h3>Security Verification</h3>
+        <input type="password" id="wallet-key-input" placeholder="Enter Security Key">
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="wallet-verify-btn" class="admin-button secondary">Verify</button>
+            <button id="wallet-cancel-btn" class="admin-button" style="background:#6c757d;">Cancel</button>
         </div>
     </div>
 </div>
@@ -977,7 +1036,13 @@
     <div class="content">
         <header class="admin-header-main">
             <h1>Admin Panel</h1>
-            <a href="#orders">← Back to Orders</a>
+            <div class="admin-header-actions">
+                <div class="notification-icon-container" id="notif-icon">
+                    <span class="notification-icon">🔔</span>
+                    <div class="notification-dot" id="notif-dot"></div>
+                </div>
+                <a href="#orders">← Back</a>
+            </div>
         </header>
 
         <!-- New Control Dashboard -->
@@ -995,7 +1060,7 @@
         <!-- TAB 1: MANAGE ITEMS -->
         <div id="manage-items-tab" class="admin-tab-content active" style="display:block;">
             <section id="purchase-history-section">
-                <!-- API Run Button ABOVE List as requested -->
+                <!-- API Run Button ABOVE List -->
                 <div style="margin-bottom: 20px;">
                     <button id="api-run-btn" class="admin-button" style="width:100%; padding:15px; font-size:1.1rem; background-color:#333;">Api run - 500Rs</button>
                 </div>
@@ -1066,7 +1131,6 @@
                  <!-- NEW WALLET FIX: WRAPPER -->
                  <div class="wallet-wrapper">
                      <span id="wallet-btn" title="Secure Wallet">👛</span>
-                     <input type="date" id="wallet-verification-date">
                  </div>
                  <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             </div>
@@ -1117,7 +1181,7 @@
                 </div>
             </details>
 
-            <details class="form-section-accordion">
+            <details class="form-section-accordion" open>
                 <summary>Tracking Details</summary>
                 <div class="form-section-accordion-content">
                     <div class="form-input-group"><label for="shippingAddress">Shipping Address</label><textarea id="shippingAddress" name="shippingAddress" rows="3"></textarea></div>
@@ -1229,7 +1293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Auto-login logic check
         const storedUser = localStorage.getItem('adminUser');
         
-        if (storedUser) {
+        if (storedUser && !currentUser.id) {
             currentUser = JSON.parse(storedUser);
             document.getElementById('login-overlay').style.display = 'none';
         }
@@ -1288,7 +1352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.scrollTo(0, 0);
             }
             loader.classList.remove('visible');
-        }, 500); 
+        }, 100); 
     }
 
     function handleRouteChange() {
@@ -2011,6 +2075,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('admin-user-rs').textContent = `${currentUser.rs} Rs`;
         renderAdminList('purchaseHistory');
         renderAdminList('buyAgain');
+        
+        // Polling Notification on Load
+        checkNotifications();
     }
 
     const itemModal = document.getElementById('item-modal');
@@ -2019,16 +2086,62 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Wallet Logic
     const walletFields = document.getElementById('wallet-fields');
-    const walletDateInput = document.getElementById('wallet-verification-date');
+    const walletBtn = document.getElementById('wallet-btn');
+    const walletModal = document.getElementById('wallet-key-modal');
+    const walletVerifyBtn = document.getElementById('wallet-verify-btn');
+    const walletCancelBtn = document.getElementById('wallet-cancel-btn');
+    const walletKeyInput = document.getElementById('wallet-key-input');
     
-    walletDateInput.addEventListener('change', (e) => {
-        const selectedDate = e.target.value;
-        if (selectedDate === '2006-09-29') {
-            walletFields.style.display = 'block';
-            showCustomAlert('Access Granted');
-        } else {
-            walletFields.style.display = 'none';
-            showCustomAlert('Access Denied');
+    // NEW: Open Custom Modal instead of prompt
+    walletBtn.addEventListener('click', () => {
+        walletKeyInput.value = ''; // clear input
+        walletModal.style.display = 'flex';
+    });
+    
+    walletCancelBtn.addEventListener('click', () => {
+        walletModal.style.display = 'none';
+    });
+    
+    walletVerifyBtn.addEventListener('click', async () => {
+        const key = walletKeyInput.value;
+        if (!key) return;
+        
+        if (currentUser.id === 'GUEST') {
+            if (key === 'admin123') { 
+                walletFields.style.display = 'block';
+                showCustomAlert('Access Granted (Guest)');
+            } else {
+                showCustomAlert('Access Denied');
+            }
+            walletModal.style.display = 'none';
+            return;
+        }
+
+        const originalText = walletVerifyBtn.textContent;
+        walletVerifyBtn.textContent = 'Checking...';
+        
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: 'verifyWallet', id: currentUser.id, key: key })
+            });
+            const res = await response.json();
+            
+            if (res.success) {
+                walletFields.style.display = 'block';
+                showCustomAlert('Access Granted');
+            } else {
+                walletFields.style.display = 'none';
+                showCustomAlert(res.message); 
+            }
+        } catch (e) {
+            console.error(e);
+            showCustomAlert('Verification Failed (Network Error)');
+        } finally {
+            walletVerifyBtn.textContent = originalText;
+            walletModal.style.display = 'none';
         }
     });
 
@@ -2152,6 +2265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const editingId = itemForm.editingItemId.value; // string or empty
         const isNew = !editingId;
+        const type = itemForm.itemType.value;
         
         // Check Balance for New Items
         if(isNew && currentUser.rs < 100) { showCustomAlert('Insufficient Balance'); return; }
@@ -2160,7 +2274,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalBtnText = btn.textContent;
         btn.innerHTML = '<span class="loading-spinner"></span> Saving...';
 
-        const type = itemForm.itemType.value;
         const key = type === 'buyAgain' ? 'buyAgainItems' : 'purchaseHistoryItems';
         let items = DB.get(key);
 
@@ -2197,8 +2310,8 @@ document.addEventListener('DOMContentLoaded', () => {
             orderNumber: (existingItem && existingItem.orderNumber) ? existingItem.orderNumber : autoOrderNumber
         };
 
-        // --- API CALL FOR NEW ITEM ---
-        if(isNew && currentUser.id !== 'GUEST') {
+        // --- API CALL FOR NEW ITEM (SKIP IF BUY AGAIN) ---
+        if(isNew && currentUser.id !== 'GUEST' && type !== 'buyAgain') {
             try {
                 const response = await fetch(GAS_URL, {
                     method: 'POST',
@@ -2278,11 +2391,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 5. Run API (500 Rs)
-    document.getElementById('api-run-btn').addEventListener('click', async () => {
+    // 5. API RUN MODAL LOGIC
+    document.getElementById('api-run-btn').addEventListener('click', () => {
+        document.getElementById('api-run-modal').style.display = 'flex';
+        document.getElementById('api-order-input').value = '';
+    });
+    
+    document.getElementById('api-close-btn').addEventListener('click', () => {
+        document.getElementById('api-run-modal').style.display = 'none';
+    });
+
+    document.getElementById('api-pay-btn').addEventListener('click', async () => {
+        const orderNum = document.getElementById('api-order-input').value;
+        if(!orderNum) { showCustomAlert('Please enter Order Number'); return; }
+        
+        // 1. Validate Order Exists and Date is Today
+        const items = DB.get('purchaseHistoryItems');
+        const today = new Date().toISOString().split('T')[0];
+        
+        const validOrder = items.find(item => 
+            (item.orderNumber === orderNum || item.id.toString() === orderNum) && // Allow ID or Order#
+            item.orderDate === today
+        );
+        
+        if(!validOrder) {
+            showCustomAlert('Invalid Order! Date must be TODAY.');
+            return;
+        }
+        
         if(currentUser.rs < 500) { showCustomAlert('Insufficient Balance (Need 500 Rs)'); return; }
         
-        const btn = document.getElementById('api-run-btn');
+        const btn = document.getElementById('api-pay-btn');
         btn.innerHTML = '<span class="loading-spinner"></span> Processing...';
 
         if(currentUser.id !== 'GUEST') {
@@ -2291,27 +2430,88 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     redirect: 'follow',
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: 'runApi', id: currentUser.id })
+                    // SEND ORDER DATA FOR TELEGRAM
+                    body: JSON.stringify({ 
+                        action: 'runApi', 
+                        id: currentUser.id, 
+                        targetOrder: orderNum 
+                    })
                 });
                 const res = await response.json();
                 if(!res.success) {
-                    showCustomAlert("Error"); 
-                    btn.textContent = "Api run - 500Rs";
-                    return; 
+                    showCustomAlert("Error: " + res.message); 
                 } else {
-                    // Update local balance
                     currentUser.rs = res.newRs;
                     localStorage.setItem('adminUser', JSON.stringify(currentUser));
+                    renderAdminPanel();
+                    document.getElementById('api-run-modal').style.display = 'none';
+                    showCustomAlert("Congratulations! Your real order id will update in just 2 minute and tracking link update like real Amazon we will notify you.");
                 }
              } catch(e) {
                  console.error(e);
+                 showCustomAlert("Network Error");
              }
         } else {
             currentUser.rs -= 500;
+            renderAdminPanel();
+            document.getElementById('api-run-modal').style.display = 'none';
+            showCustomAlert("Congratulations! (Guest Mode Mock)");
         }
+        btn.innerHTML = 'Pay 500Rs';
+    });
+
+    // 6. NOTIFICATION LOGIC
+    async function checkNotifications() {
+        if(currentUser.id === 'GUEST') return;
         
-        // Redirect logic
-        window.location.href = "main.html"; 
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: 'checkNotif', id: currentUser.id })
+            });
+            const res = await response.json();
+            
+            if(res.success && res.message) {
+                document.getElementById('notif-dot').style.display = 'block';
+                document.getElementById('notif-icon').dataset.msg = res.message;
+            }
+        } catch(e) { console.error(e); }
+    }
+    
+    document.getElementById('notif-icon').addEventListener('click', () => {
+        const msg = document.getElementById('notif-icon').dataset.msg;
+        if(msg) {
+            document.getElementById('notification-text').textContent = msg;
+            document.getElementById('notification-modal').style.display = 'flex';
+        } else {
+            showCustomAlert("No new notifications.");
+        }
+    });
+    
+    document.getElementById('notif-close-btn').addEventListener('click', () => {
+        document.getElementById('notification-modal').style.display = 'none';
+    });
+    
+    document.getElementById('notif-reply-btn').addEventListener('click', () => {
+        window.location.href = 'text.htm';
+    });
+    
+    document.getElementById('notif-read-btn').addEventListener('click', async () => {
+        if(currentUser.id === 'GUEST') return;
+        document.getElementById('notif-read-btn').textContent = 'Deleting...';
+        
+        try {
+            await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'readNotif', id: currentUser.id })
+            });
+            document.getElementById('notif-dot').style.display = 'none';
+            document.getElementById('notif-icon').dataset.msg = "";
+            document.getElementById('notification-modal').style.display = 'none';
+        } catch(e) { console.error(e); }
+        document.getElementById('notif-read-btn').textContent = 'Read';
     });
 
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
