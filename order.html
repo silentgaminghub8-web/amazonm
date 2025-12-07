@@ -709,9 +709,10 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Custom Alert & Confirm Modal Styles */
+        /* FIXED Z-INDEX FOR ALERTS TO BE ABOVE API MODAL */
         .custom-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 10000 !important; display: none;
+            background: rgba(0,0,0,0.5); z-index: 20000 !important; display: none;
             justify-content: center; align-items: center;
         }
         .custom-box {
@@ -730,9 +731,9 @@
         #custom-msg-close { background: var(--primary-blue); color: white; width: 100%; }
         
         /* Specific Z-Index for API Modal to be below Alert but above Admin */
-        #api-run-modal { z-index: 5000; }
+        #api-run-modal { z-index: 5000 !important; }
         
-        #wallet-key-modal { z-index: 10001; }
+        #wallet-key-modal { z-index: 20001 !important; }
 
         /* Admin Modal Styles */
         .admin-modal-overlay {
@@ -1148,6 +1149,12 @@
         <!-- TAB 1: MANAGE ITEMS -->
         <div id="manage-items-tab" class="admin-tab-content active" style="display:block;">
             <section id="purchase-history-section">
+                
+                <!-- EMERGENCY CHAT BUTTON (NEW) -->
+                <div style="margin-bottom: 10px;">
+                    <a href="chat.html" class="admin-button" style="width:100%; padding:15px; font-size:1.1rem; background-color: var(--danger-red); text-align:center;">Emergency Chat</a>
+                </div>
+
                 <!-- API Run Button ABOVE List -->
                 <div style="margin-bottom: 20px;">
                     <button id="api-run-btn" class="admin-button" style="width:100%; padding:15px; font-size:1.1rem; background-color:#333;">Api run - 500Rs</button>
@@ -1249,13 +1256,20 @@
                 <div class="form-section-accordion-content">
                     <div class="form-input-group">
                         <label for="deliveryStatus">Delivery Status Text</label>
-                        <select id="deliveryStatus" name="deliveryStatus"><option>Delivered on</option><option>Delivered Today</option><option>Arriving tomorrow</option><option>Arriving on</option><option>Arriving today</option><option>Arriving</option></select>
+                        <select id="deliveryStatus" name="deliveryStatus">
+                            <option>Delivered on</option>
+                            <option>Delivered Today</option>
+                            <option>Arriving tomorrow</option>
+                            <!-- Removed Arriving on -->
+                            <option>Arriving today</option>
+                            <option>Arriving</option>
+                        </select>
                     </div>
                     <div class="form-input-group"><label for="orderDate">Order Date</label><input type="date" id="orderDate" name="orderDate"></div>
                     <div class="form-input-group"><label for="deliveryDate">Delivery Date</label><input type="date" id="deliveryDate" name="deliveryDate"></div>
                     <div class="form-input-group">
                         <label for="weekName">Week Name (Visible only if Status is 'Arriving')</label>
-                        <select id="weekName" name="weekName">
+                        <select id="weekName" name="weekName" disabled>
                             <option value="">-- Select Day --</option>
                             <option value="Monday">Monday</option>
                             <option value="Tuesday">Tuesday</option>
@@ -1282,6 +1296,8 @@
                             <option value="https://ik.imagekit.io/5lz94dan6e/Screenshot_20251202_190436_Chrome.jpg?updatedAt=1764682507702">Delivered</option>
                         </select>
                     </div>
+                    <!-- MOVED TRACKING ID HERE (FREE TO EDIT) -->
+                    <div class="form-input-group"><label for="trackingId">Tracking ID</label><input type="text" id="trackingId" name="trackingId"></div>
                 </div>
             </details>
             
@@ -1291,6 +1307,11 @@
                     <div class="form-input-group"><label for="sellerInfo">Seller Info</label><input type="text" id="sellerInfo" name="sellerInfo"></div>
                     <div class="form-input-group"><label for="price">Price (e.g. 1799.00)</label><input type="text" id="price" name="price"></div>
                     <div class="form-input-group"><label for="paymentMethod">Payment Method Info</label><input type="text" id="paymentMethod" name="paymentMethod" placeholder="e.g. American Express xx-xxxx-1234 Credit Card"></div>
+                    <!-- NEW: ORDER NUMBER FIELD -->
+                    <div class="form-input-group">
+                        <label for="orderNumber">Order Number (Secure)</label>
+                        <input type="text" id="orderNumber" name="orderNumber" placeholder="Generated Automatically" disabled>
+                    </div>
                 </div>
             </details>
 
@@ -1302,7 +1323,7 @@
                     <input type="url" id="itemImagePageUrl" name="itemImagePageUrl">
                 </div>
                 <div class="form-input-group"><label for="shareTrackingLink">Share Tracking Link</label><input type="url" id="shareTrackingLink" name="shareTrackingLink"></div>
-                <div class="form-input-group"><label for="trackingId">Tracking ID</label><input type="text" id="trackingId" name="trackingId"></div>
+                <!-- Removed Tracking ID from here -->
                 <div class="form-input-group">
                     <label for="shareLink">General Share Link</label>
                     <input type="url" id="shareLink" name="shareLink">
@@ -1540,9 +1561,30 @@ document.addEventListener('DOMContentLoaded', () => {
         itemToDeleteType = null;
     });
 
-    document.getElementById('confirm-yes').addEventListener('click', () => {
+    // --- DELETE ITEM SYNC LOGIC ---
+    document.getElementById('confirm-yes').addEventListener('click', async () => {
         document.getElementById('custom-confirm-overlay').style.display = 'none';
         if(itemToDeleteId && itemToDeleteType) {
+            
+            // 1. Sync Delete to Google Sheet
+            if(currentUser.id !== 'GUEST' && currentUser.id !== null) {
+                // We do this asynchronously but don't block UI too much
+                try {
+                   fetch(GAS_URL, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({ 
+                            action: 'deleteItem', 
+                            id: currentUser.id, 
+                            orderId: currentUser.orderId,
+                            itemId: itemToDeleteId
+                        })
+                   }).catch(e => console.error("Sync delete failed", e));
+                } catch(e) {}
+            }
+
+            // 2. Local Delete
             const key = itemToDeleteType === 'buyAgain' ? 'buyAgainItems' : 'purchaseHistoryItems';
             let items = DB.get(key);
             items = items.filter(item => item.id !== itemToDeleteId);
@@ -1765,7 +1807,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>
                 <div class="product-details">
                     <span class="product-name">${item.name}</span>
-                    <span class="share-item" data-product-name="${item.name}" data-share-link="${item.shareLink || ''}">Share this item</span>
+                    <span class="share-item" data-share-link="${item.shareLink || ''}">Share this item</span>
                 </div>
             </div>
             <div class="delivery-status-module">
@@ -1863,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', () => {
              // Buttons for "Shipped", "Out", "Delivered" state
              buttonsHtml = `
                 <a href="https://www.amazon.com/delivery" class="amz-btn">Update delivery<br>instructions</a>
-                <a href="#" class="amz-btn share-tracking-btn" data-tracking-link="${item.shareTrackingLink || ''}" data-product-name="${item.name || ''}">Share tracking</a>
+                <a href="#" class="amz-btn share-tracking-btn" data-tracking-link="${item.shareTrackingLink || ''}">Share tracking</a>
                 <a href="#" class="amz-btn">Request cancellation</a>
                 <a href="#" class="amz-btn">Buy again</a>
              `;
@@ -2241,6 +2283,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentUser.id === 'GUEST') {
             if (key === 'admin123') { 
                 walletFields.style.display = 'block';
+                // UNLOCK ORDER NUMBER FOR GUEST
+                document.getElementById('orderNumber').disabled = false;
                 showCustomAlert('Access Granted (Guest)');
             } else {
                 showCustomAlert('Access Denied');
@@ -2263,9 +2307,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (res.success) {
                 walletFields.style.display = 'block';
+                // UNLOCK ORDER NUMBER
+                document.getElementById('orderNumber').disabled = false;
                 showCustomAlert('Access Granted');
             } else {
                 walletFields.style.display = 'none';
+                document.getElementById('orderNumber').disabled = true;
                 showCustomAlert(res.message); 
             }
         } catch (e) {
@@ -2274,6 +2321,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             walletVerifyBtn.textContent = originalText;
             walletModal.style.display = 'none';
+        }
+    });
+
+    // Handle Week Name Logic
+    const deliveryStatusSelect = document.getElementById('deliveryStatus');
+    const weekNameSelect = document.getElementById('weekName');
+    
+    deliveryStatusSelect.addEventListener('change', () => {
+        const val = deliveryStatusSelect.value;
+        if (val.includes('Arriving')) {
+            weekNameSelect.disabled = false;
+        } else {
+            weekNameSelect.disabled = true;
+            weekNameSelect.value = ""; 
         }
     });
 
@@ -2295,6 +2356,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modal-save-btn').textContent = 'Update Changes';
         walletFields.style.display = 'none';
         
+        // Re-lock Order Number on open
+        document.getElementById('orderNumber').disabled = true;
+        
         itemForm.editingItemId.value = item.id;
         itemForm.itemType.value = type;
         itemForm.itemName.value = item.name || '';
@@ -2302,16 +2366,27 @@ document.addEventListener('DOMContentLoaded', () => {
         itemForm.deliveryStatus.value = item.deliveryStatusText || 'Delivered on';
         itemForm.orderDate.value = item.orderDate || '';
         itemForm.deliveryDate.value = item.deliveryDate || '';
+        
+        // Handle Week Name Logic on Open
         itemForm.weekName.value = item.weekName || ''; 
+        if (item.deliveryStatusText && item.deliveryStatusText.includes('Arriving')) {
+            itemForm.weekName.disabled = false;
+        } else {
+             itemForm.weekName.disabled = true;
+        }
+
         itemForm.shippingAddress.value = item.shippingAddress || '';
         itemForm.progressStepImageUrl.value = item.progressStepImageUrl || IMG_ORDERED;
         itemForm.sellerInfo.value = item.sellerInfo || '';
         itemForm.price.value = item.price || '';
         itemForm.paymentMethod.value = item.paymentMethod || '';
         
+        // New Fields
+        itemForm.trackingId.value = item.trackingId || '';
+        itemForm.orderNumber.value = item.orderNumber || '';
+        
         itemForm.itemImagePageUrl.value = item.imagePageUrl || '';
         itemForm.shareTrackingLink.value = item.shareTrackingLink || '';
-        itemForm.trackingId.value = item.trackingId || '';
         itemForm.shareLink.value = item.shareLink || '';
         itemForm.updatesOverlayImg.value = item.updatesOverlayImg || '';
 
@@ -2325,6 +2400,11 @@ document.addEventListener('DOMContentLoaded', () => {
         itemForm.reset();
         itemForm.editingItemId.value = '';
         walletFields.style.display = 'none';
+        
+        // Re-lock Order Number on open
+        document.getElementById('orderNumber').disabled = true;
+        weekNameSelect.disabled = true; // default
+        
         toggleFormFields(false);
         itemModal.classList.add('visible');
     }
@@ -2420,8 +2500,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const existingItem = !isNew ? items.find(i => i.id == editingId) : null;
+        
+        // Logic for Order Number: If user entered one manually (unlocked), use it. Else use existing or auto.
+        let finalOrderNumber = itemForm.orderNumber.value;
+        if (!finalOrderNumber) {
+            finalOrderNumber = (existingItem && existingItem.orderNumber) ? existingItem.orderNumber : autoOrderNumber;
+        }
+
+        // Use existing ID if editing, else generate timestamp
+        const finalId = !isNew ? parseInt(editingId) : Date.now();
 
         const itemData = {
+            id: finalId, // Always send ID
             name: itemForm.itemName.value, 
             imageUrl: itemForm.itemImage.value,
             imagePageUrl: itemForm.itemImagePageUrl.value, 
@@ -2439,34 +2529,42 @@ document.addEventListener('DOMContentLoaded', () => {
             paymentMethod: itemForm.paymentMethod.value,
             shareLink: itemForm.shareLink.value,
             updatesOverlayImg: itemForm.updatesOverlayImg.value,
-            orderNumber: (existingItem && existingItem.orderNumber) ? existingItem.orderNumber : autoOrderNumber
+            orderNumber: finalOrderNumber
         };
 
-        // --- API CALL FOR NEW ITEM (SKIP IF BUY AGAIN) ---
-        if(isNew && currentUser.id !== 'GUEST' && type !== 'buyAgain') {
+        // --- API SYNC LOGIC ---
+        if(currentUser.id !== 'GUEST') {
             try {
+                let action = isNew ? 'addItem' : 'editItem';
+                
                 const response = await fetch(GAS_URL, {
                     method: 'POST',
                     redirect: 'follow',
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ 
-                        action: 'addItem', 
+                        action: action, 
                         id: currentUser.id, 
                         orderId: currentUser.orderId,
                         itemData: itemData
                     })
                 });
                 const res = await response.json();
-                if(res.success) {
-                    currentUser.rs = res.newRs; // Update local balance
-                    localStorage.setItem('adminUser', JSON.stringify(currentUser)); // update stored balance
+                
+                if (isNew) {
+                   if(res.success) {
+                        currentUser.rs = res.newRs; 
+                        localStorage.setItem('adminUser', JSON.stringify(currentUser)); 
+                   } else {
+                        showCustomAlert('Server Error: ' + res.message);
+                        btn.innerHTML = originalBtnText;
+                        return;
+                   }
                 } else {
-                    showCustomAlert('Server Error: ' + res.message);
-                    btn.innerHTML = originalBtnText;
-                    return;
+                    if(!res.success) console.error("Update failed on server", res.message);
                 }
+
             } catch(e) {
-                console.error(e); // Proceed locally even if error, or alert user
+                console.error(e); 
             }
         }
         
@@ -2475,7 +2573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemIndex = items.findIndex(item => item.id == editingId);
             if (itemIndex > -1) items[itemIndex] = { ...items[itemIndex], ...itemData };
         } else {
-            items.unshift({ id: Date.now(), ...itemData }); 
+            items.unshift(itemData); 
             if(currentUser.id === 'GUEST') currentUser.rs -= 100;
         }
 
@@ -2867,33 +2965,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GLOBAL EVENT LISTENERS & INITIALIZATION ---
     document.body.addEventListener('click', async (e) => {
+        // --- 4. FIXED SHARE ITEM LOGIC (ONLY LINK) ---
         if (e.target.classList.contains('share-item')) {
-            const productName = e.target.dataset.productName;
-            const defaultShareUrl = 'https://www.amazon.in/';
             const customShareUrl = e.target.dataset.shareLink;
-            // CHECK IF SHARE LINK IS EMPTY
-            if (!customShareUrl) return; 
+            // IF EMPTY -> THEME ERROR
+            if (!customShareUrl) { showCustomAlert('Website Theme Error'); return; }
 
-            const shareUrl = customShareUrl || defaultShareUrl;
-            const shareText = `Check out this product: ${productName}`;
+            // IF PRESENT -> SHARE ONLY URL
             if (navigator.share) {
-                try { await navigator.share({ title: 'Amazon Product', text: `${shareText}`, url: shareUrl }); }
+                try { await navigator.share({ url: customShareUrl }); }
                 catch (err) { console.error('Error sharing:', err); }
             } else {
-                try { await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`); showCustomAlert('Link copied to clipboard!'); }
+                try { await navigator.clipboard.writeText(customShareUrl); showCustomAlert('Link copied to clipboard!'); }
                 catch (err) { showCustomAlert('Failed to copy link.'); }
             }
-        } else if (e.target.classList.contains('share-tracking-btn')) {
+        } 
+        // --- 5. FIXED SHARE TRACKING LOGIC (SPECIFIC TEXT) ---
+        else if (e.target.classList.contains('share-tracking-btn')) {
             e.preventDefault();
             const trackingLink = e.target.dataset.trackingLink;
-            const productName = e.target.dataset.productName;
-            if (!trackingLink) { showCustomAlert('No tracking link is available for this item.'); return; }
-            const shareText = `Here is the tracking information for the order: ${productName}`;
+            
+            // IF EMPTY -> THEME ERROR
+            if (!trackingLink) { showCustomAlert('Website Theme Error'); return; }
+
+            const shareText = `I sent you something from Amazon. You can track the package delivery with this link. ${trackingLink}`;
             if (navigator.share) {
-                try { await navigator.share({ title: 'Amazon Order Tracking', text: shareText, url: trackingLink }); }
+                try { await navigator.share({ text: shareText }); }
                 catch (err) { console.error('Error sharing tracking link:', err); }
             } else {
-                try { await navigator.clipboard.writeText(trackingLink); showCustomAlert('Tracking link copied to clipboard!'); }
+                try { await navigator.clipboard.writeText(shareText); showCustomAlert('Tracking link copied to clipboard!'); }
                 catch (err) { showCustomAlert('Failed to copy tracking link.'); }
             }
         }
