@@ -1,1 +1,198 @@
-.hello .
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Back Button Styles */
+        .top-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Main Content Styles */
+        .content-container {
+            text-align: center;
+            padding: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff00cc, #333399);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.4);
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #fff, #a5a5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            line-height: 1.6;
+        }
+
+        /* Loading Animation */
+        .loader-line {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .loader-line::before {
+            content: '';
+            position: absolute;
+            left: -50%;
+            height: 100%;
+            width: 50%;
+            background: #ffffff;
+            border-radius: 4px;
+            animation: lineAnim 1.5s infinite ease-in-out;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes lineAnim {
+            0% {
+                left: -50%;
+            }
+            50% {
+                left: 25%;
+                width: 50%;
+            }
+            100% {
+                left: 100%;
+                width: 20%;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Back Button -->
+    <div class="top-nav">
+        <button class="back-button" onclick="goBack()">
+            <svg viewBox="0 0 24 24">
+                <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
+            </svg>
+            Back
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <span class="badge">In Progress</span>
+        <h1>Coming Soon</h1>
+        <p>We are working hard to build these amazing features. This page is currently under construction and will be available shortly.</p>
+        
+        <div class="loader-line"></div>
+    </div>
+
+    <!-- JavaScript Functionality -->
+    <script>
+        function goBack() {
+            // This function sends the user back to the previous page in their history
+            if (document.referrer !== "") {
+                window.history.back();
+            } else {
+                // Optional fallback if there is no history (e.g. user opened link directly)
+                // You can change '/' to your homepage URL if needed
+                window.location.href = '/'; 
+            }
+        }
+    </script>
+
+</body>
+</html>
